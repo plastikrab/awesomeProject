@@ -16,6 +16,11 @@ func NewTokenHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if err := db.Ping(); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("Successfully Connected")
+	}
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
@@ -27,7 +32,7 @@ func NewTokenHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var token entytyes.IncomingData
+	var token entytyes.TokenData
 	err = json.NewDecoder(r.Body).Decode(&token)
 	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -35,6 +40,7 @@ func NewTokenHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = repo.Create(token)
 	if err != nil {
+		println("Error: " + err.Error())
 		return
 	}
 	fmt.Println(token.Token)
